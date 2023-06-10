@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using UnityEngine;
 
-public class Physfs : MonoBehaviour
+public class Physfs
 {   
     public enum PHYSFS_ErrorCode
     {
