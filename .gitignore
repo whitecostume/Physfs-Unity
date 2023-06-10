@@ -9,6 +9,11 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+CMakeFiles/
+/physfs/build/build_window/Release/
+/physfs/build/build_window/Debug/
+/physfs/build/build_window/*.dir/
+/physfs/build/build_window/x64/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
