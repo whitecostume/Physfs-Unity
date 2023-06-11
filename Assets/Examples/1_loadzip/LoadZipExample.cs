@@ -2,14 +2,13 @@
 using UnityEngine.UI;
 using PhysfsUnity;
 
+/// <summary>
+/// Load a txt file in the compressed package
+/// </summary>
 public class LoadZipExample : MonoBehaviour
 {
     public Text text;
-    
 
-
-    private int _handler;
-    
     void Start()
     {
      

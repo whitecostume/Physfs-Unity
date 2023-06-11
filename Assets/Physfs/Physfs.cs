@@ -56,7 +56,6 @@ namespace PhysfsUnity
             unsafe
             {
                 int result = Physfs_Dll.PHYSFS_mount(path,mountPoint,appendToPath);
-
                 // mount fail
                 if (result == 0)
                 {
@@ -110,7 +109,32 @@ namespace PhysfsUnity
             Physfs_Dll.PHYSFS_unmount(path);
         }
 
-        
+        /// <summary>
+        /// offset in bytes from start of file.
+        /// </summary>
+        /// <param name="handle">handle returned from PHYSFS_open*().</param>
+        /// <returns>offset in bytes from start of file. -1 if error occurred.</returns>
+        public static long Tell(string assetPath)
+        {
+            unsafe
+            {
+                Physfs_Dll.PHYSFS_File* file = Physfs_Dll.PHYSFS_openRead(assetPath);
+                if (file == null)
+                {
+                    Debug.LogError($"file {assetPath} open fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}");   
+                    return -1;
+                }
+
+                long offset = Physfs_Dll.PHYSFS_tell(file);
+                
+                if (offset == -1)
+                {
+                    Debug.LogError($"file {assetPath} tell fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}");  
+                }
+                Physfs_Dll.PHYSFS_close(file);
+                return offset;
+            }
+        }
 
         public static bool ReadBytes(string assetPath,out byte[] bytes,out long fileLength)
         {

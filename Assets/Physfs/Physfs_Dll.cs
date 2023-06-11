@@ -6,7 +6,7 @@ namespace PhysfsUnity
 
     public class Physfs_Dll
     {
-       
+        
 
         [StructLayoutAttribute(LayoutKind.Sequential)]
         public struct PHYSFS_File
@@ -22,7 +22,7 @@ namespace PhysfsUnity
         public static extern int PHYSFS_init(string args);
 
 #if (UNITY_IOS || UNITY_TVOS) && !UNITY_EDITOR
-            [DllImport ("__Internal")]
+        [DllImport ("__Internal")]
 #else
         [DllImport("physfs")]
 #endif
@@ -52,6 +52,28 @@ namespace PhysfsUnity
         [DllImport("physfs")]
 #endif
         public static unsafe extern int PHYSFS_mountHandle(PHYSFS_File* file, string newDir, string mountPoint, int appendToPath);
+        
+
+        /// <summary>
+        /// offset in bytes from start of file.
+        /// </summary>
+        /// <param name="handle">handle returned from PHYSFS_open*().</param>
+        /// <returns>offset in bytes from start of file. -1 if error occurred.Use PHYSFS_getLastErrorCode() to obtain the specific error.</returns>
+#if (UNITY_IOS || UNITY_TVOS) && !UNITY_EDITOR
+        [DllImport ("__Internal")]
+#else
+        [DllImport("physfs")]
+#endif
+        public static unsafe extern long  PHYSFS_tell(PHYSFS_File* handle);
+        
+        
+#if (UNITY_IOS || UNITY_TVOS) && !UNITY_EDITOR
+        [DllImport ("__Internal")]
+#else
+        [DllImport("physfs")]
+#endif
+        public unsafe static extern int PHYSFS_seek(PHYSFS_File* handle,ulong pos);
+
 
 #if (UNITY_IOS || UNITY_TVOS) && !UNITY_EDITOR
             [DllImport ("__Internal")]
@@ -73,6 +95,8 @@ namespace PhysfsUnity
         [DllImport("physfs")]
 #endif
         public unsafe static extern PHYSFS_File* PHYSFS_openRead(string filepath);
+
+        
 
 #if (UNITY_IOS || UNITY_TVOS) && !UNITY_EDITOR
         [DllImport ("__Internal")]

@@ -31,6 +31,8 @@ CMakeFiles/
 # Visual Studio cache directory
 .vs/
 .vscode/
+AssetBundles-Browser-master/
+AssetBundles/
 
 # Gradle cache directory
 .gradle/
