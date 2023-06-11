@@ -389,7 +389,7 @@ GameObject:
   - component: {fileID: 1128320478}
   - component: {fileID: 1128320479}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: LoadZip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -419,7 +419,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1128320477}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 189f4bf77d350a14daf1b1e586ba7316, type: 3}
+  m_Script: {fileID: 11500000, guid: 5ab4bfa8ada141a4c8e8ffdcad658488, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 1619627675}
@@ -488,13 +488,13 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 2
     m_MaxSize: 40
-    m_Alignment: 0
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: testtstesst
+  m_Text: Load Zip
 --- !u!222 &1619627676
 CanvasRenderer:
   m_ObjectHideFlags: 0
