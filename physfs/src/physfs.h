@@ -2854,7 +2854,7 @@ PHYSFS_DECL const PHYSFS_Allocator *PHYSFS_getAllocator(void);
 /**
  * 
 */
-PHYSFS_DECL const PHYSFS_sint64 PHYSFS_calRealFileOffset(char* fname,char** relativePath);
+PHYSFS_DECL PHYSFS_sint64 PHYSFS_calRealFileOffset(char* fname,char** relativePath);
 
 
 /**

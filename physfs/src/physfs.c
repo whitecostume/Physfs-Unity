@@ -3260,7 +3260,7 @@ const PHYSFS_Allocator *PHYSFS_getAllocator(void)
 } /* PHYSFS_getAllocator */
 
 // 计算真文件的偏移
-const PHYSFS_sint64 PHYSFS_calRealFileOffset(char* fname,char** relativePath)
+PHYSFS_sint64 PHYSFS_calRealFileOffset(char* fname,char** relativePath)
 {
     DirHandle *dh = getRealDirHandle(fname);
     if (dh == NULL)
@@ -3277,7 +3277,9 @@ const PHYSFS_sint64 PHYSFS_calRealFileOffset(char* fname,char** relativePath)
         return 0;
     }
 
-    *relativePath = (dh->dirName);
+    *relativePath = (char *) allocator.Malloc(strlen(dh->dirName) + 1);
+    BAIL_IF(!(*relativePath),PHYSFS_ERR_OUT_OF_MEMORY,-1);
+    strcpy(*relativePath, dh->dirName);
 
     PHYSFS_sint64 offset = dh->funcs->getFileOffset(dh->opaque, fname);
 

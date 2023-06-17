@@ -53,6 +53,11 @@ namespace PhysfsUnity
             return  result;
         }
 
+        public static bool IsInit()
+        {
+            return Physfs_Dll.PHYSFS_isInit() != 0;
+        }
+
         /**
             return nonzero on success, zero on error. Specifics of the error can be
             gleaned from PHYSFS_getLastError(). If failure, state of PhysFS is
