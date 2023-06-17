@@ -11,11 +11,32 @@ env:
   BUILD_TYPE: Release
 
 jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install NDK
+        run: |
+          cd ~
+          wget -O NDK -q https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+          sudo apt install unzip -y
+          unzip -q NDK
+          ANDROID_NDK_HOME=$(pwd)/android-ndk-r25c
+      - name: Build
+        run: |
+          cd physfs
+          ./make_android.sh
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./physfs/build_android/**/*
+          name: android_physfs_so
+
   windows:
     runs-on: windows-2022
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Insatll MSVC
         uses: microsoft/setup-msbuild@v1.3.1
@@ -26,8 +47,8 @@ jobs:
           cd physfs
           .\make_win.bat
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ./physfs/build_win/Release/physfs.dll
-          name: win_physfs.dll
+          name: win_physfs_dll
 
