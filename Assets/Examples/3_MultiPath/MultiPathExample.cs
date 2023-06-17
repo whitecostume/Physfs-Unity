@@ -16,8 +16,7 @@ public class MultiPathExample : MonoBehaviour
 
         string rmainZip;
         long mainZipOffset = Physfs.CalRealFileOffset($"assets/{dirPath}",out rmainZip);
-        long mainZipLength = Physfs.ReadFileLength($"assets/{dirPath}");
-        Physfs.Unmount(path);
+        long mainZipLength = mainZipOffset > 0 ? Physfs.ReadFileLength($"assets/{dirPath}") : -1;
         if (!Physfs.MountOffset(path,null,appendToPath,(ulong)mainZipOffset,mainZipLength))
             return;
     #else

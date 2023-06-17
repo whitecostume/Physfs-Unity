@@ -174,7 +174,7 @@ namespace PhysfsUnity
                 if (file == null)
                 {
                     Debug.LogError($"file {assetPath} open fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}");   
-                    return 0;
+                    return -1;
                 }  
                 
                 var fileLength = Physfs_Dll.PHYSFS_fileLength(file);
