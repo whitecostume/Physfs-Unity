@@ -44,6 +44,7 @@ typedef struct __PHYSFS_DIRHANDLE__
     void *opaque;  /* Instance data unique to the archiver. */
     char *dirName;  /* Path to archive in platform-dependent notation. */
     char *mountPoint; /* Mountpoint in virtual file tree. */
+    PHYSFS_uint64 offset;
     char *root;  /* subdirectory of archiver to use as root of archive (NULL for actual root) */
     size_t rootlen;  /* subdirectory of archiver to use as root of archive (NULL for actual root) */
     const PHYSFS_Archiver *funcs;  /* Ptr to archiver info for this handle. */
@@ -935,6 +936,7 @@ static DirHandle *openDirectory(PHYSFS_Io *io, const char *d, int forWriting,PHY
         io->destroy(io);
 
     BAIL_IF(!retval, errcode, NULL);
+    retval->offset = offset;
     return retval;
 } /* openDirectory */
 
@@ -1821,7 +1823,8 @@ static int doMount(PHYSFS_Io *io, const char *fname,
     for (i = searchPath; i != NULL; i = i->next)
     {
         /* already in search path? */
-        if ((i->dirName != NULL) && (strcmp(fname, i->dirName) == 0))
+        if ((i->dirName != NULL) && (strcmp(fname, i->dirName) == 0)
+                &&(i->offset == offset))
             BAIL_MUTEX_ERRPASS(stateLock, 1);
         prev = i;
     } /* for */
