@@ -35,6 +35,7 @@ AssetBundles-Browser-master/
 AssetBundles/
 physfs/build_win/
 physfs/build_osx/
+physfs/build_ios/
 
 # Gradle cache directory
 .gradle/

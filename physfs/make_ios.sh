@@ -4,4 +4,4 @@ cd ..
 cmake --build build_ios --config Release -- CODE_SIGNING_ALLOWED=NO
 
 mkdir -p Plugins/iOS/
-cp build_ios/Release/libphysfs.a Plugins/iOS/libphysfs.a 
+cp build_ios/Release-iphoneos/libphysfs.a Plugins/iOS/libphysfs.a 
