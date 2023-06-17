@@ -21,6 +21,9 @@ jobs:
           cd physfs
           chmod 777 make_ios.sh
           ./make_ios.sh
+
+           chmod 777 make_osx.sh
+          ./make_osx.sh
           
       - name: Upload
         uses: actions/upload-artifact@v3
@@ -31,8 +34,8 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
-          path: ./physfs/build_ios/**/*.dylib
-          name: ios_physfs
+          path: ./physfs/build_osx/**/*.dylib
+          name: osx_physfs
 
   android:
     runs-on: ubuntu-latest
