@@ -1,4 +1,6 @@
 # Unity Physfs Plugin
+[![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/whitecostume/Physfs-Unity/blob/main/LICENSE.TXT)
+[![release](https://img.shields.io/badge/release-v0.0.1-blue.svg)](https://github.com/whitecostume/Physfs-Unity/releases)
 
 ## Desc
 
