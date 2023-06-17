@@ -19,6 +19,9 @@ function build() {
     BUILD_PATH=Android.${ABI}
     cmake -H. -B${BUILD_PATH} -DANDROID_ABI=${ABI} -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${NDK}/build/cmake/android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL=${API}
     cmake --build ${BUILD_PATH} --config Release
+
+    mkdir -p Plugins/Android/${ABI}/
+    cp ${BUILD_PATH}/libphysfs.so Plugins/Android/${ABI}/libphysfs.so
 }
 
 build android-19 armeabi-v7a
