@@ -2233,6 +2233,12 @@ PHYSFS_DECL int PHYSFS_setAllocator(const PHYSFS_Allocator *allocator);
 PHYSFS_DECL int PHYSFS_mount(const char *newDir,
                              const char *mountPoint,
                              int appendToPath);
+                            
+PHYSFS_DECL int PHYSFS_mountOffset(const char *newDir,
+                             const char *mountPoint,
+                             int appendToPath,
+                             PHYSFS_uint64 offset,
+                             PHYSFS_sint64 fileLength);
 
 /**
  * \fn int PHYSFS_getMountPoint(const char *dir)
@@ -2845,6 +2851,11 @@ PHYSFS_DECL int PHYSFS_unmount(const char *oldDir);
  */
 PHYSFS_DECL const PHYSFS_Allocator *PHYSFS_getAllocator(void);
 
+/**
+ * 
+*/
+PHYSFS_DECL const PHYSFS_sint64 PHYSFS_calRealFileOffset(const char* fname,char** relativePath);
+
 
 /**
  * \enum PHYSFS_FileType
@@ -3088,6 +3099,10 @@ typedef struct PHYSFS_Io
      *  deallocated during the destroy() method.
      */
     void *opaque;
+
+    PHYSFS_uint64 offset;
+
+    PHYSFS_sint64 filelength;
 
     /**
      * \brief Read more data.
@@ -3807,6 +3822,8 @@ typedef struct PHYSFS_Archiver
      *  there are still files open from this archive.
      */
     void (*closeArchive)(void *opaque);
+    
+    PHYSFS_sint64 (*getFileOffset)(void *opaque, const char *fn);
 } PHYSFS_Archiver;
 
 /**

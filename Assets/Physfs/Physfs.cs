@@ -66,47 +66,31 @@ namespace PhysfsUnity
             }
         }
 
-        /// <summary>
-        /// Mount the compressed package in the compressed package
-        /// </summary>
-        /// <param name="root"></param>
-        /// <param name="subArchive"></param>
-        /// <param name="mountPoint"></param>
-        /// <param name="appendToPath"></param>
-        /// <returns></returns>
-        public static bool MountArchiveInArchive(string root,string subArchive,string archive,string mountPoint,int appendToPath)
+        public static bool MountOffset(string path,string mountPoint,int appendToPath,ulong offset,long fileLength)
         {
             unsafe
             {
-                int result =  Physfs_Dll.PHYSFS_mount(root,null,appendToPath);
-
+                int result = Physfs_Dll.PHYSFS_mountOffset(path,mountPoint,appendToPath,offset,fileLength);
+                // mount fail
                 if (result == 0)
                 {
-                    Debug.LogError($"mount {root} fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}" );
+                    Debug.LogError($"mount offset {path} fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}" );
                     return false;
                 }
-
-                Physfs_Dll.PHYSFS_File* mainArchive = Physfs_Dll.PHYSFS_openRead(subArchive);
-                if (mainArchive == null)
-                {
-                    Debug.LogError($"file {subArchive} open fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}");   
-                    return false;
-                }
-                result = Physfs_Dll.PHYSFS_mountHandle(mainArchive,archive,null,appendToPath);
-
-                if (result == 0)
-                {
-                    Debug.LogError($"mount {subArchive} fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}" );
-                    return false;
-                }
-
                 return true;
             }
         }
 
+      
+
         public static void Unmount(string path)
         {
             Physfs_Dll.PHYSFS_unmount(path);
+        }
+
+        public static long CalRealFileOffset(string file,out string filebuffer)
+        {
+            return Physfs_Dll.PHYSFS_calRealFileOffset(file, out filebuffer);
         }
 
         /// <summary>
@@ -155,6 +139,24 @@ namespace PhysfsUnity
                 Physfs_Dll.PHYSFS_readBytes(file,bytes,(ulong)fileLength);
                 Physfs_Dll.PHYSFS_close(file);
                 return true;
+            }
+        }
+
+        public static long ReadFileLength(string assetPath)
+        {
+            unsafe
+            {
+                Physfs_Dll.PHYSFS_File* file = Physfs_Dll.PHYSFS_openRead(assetPath);
+
+                if (file == null)
+                {
+                    Debug.LogError($"file {assetPath} open fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}");   
+                    return 0;
+                }  
+                
+                var fileLength = Physfs_Dll.PHYSFS_fileLength(file);
+                Physfs_Dll.PHYSFS_close(file);
+                return fileLength;
             }
         }
 

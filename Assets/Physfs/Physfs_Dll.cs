@@ -51,8 +51,14 @@ namespace PhysfsUnity
 #else
         [DllImport("physfs")]
 #endif
+        public static extern int PHYSFS_mountOffset(string newDir, string mountPoint, int appendToPath,ulong offset,long fileLength);
+
+#if (UNITY_IOS || UNITY_TVOS) && !UNITY_EDITOR
+        [DllImport ("__Internal")]
+#else
+        [DllImport("physfs")]
+#endif
         public static unsafe extern int PHYSFS_mountHandle(PHYSFS_File* file, string newDir, string mountPoint, int appendToPath);
-        
 
         /// <summary>
         /// offset in bytes from start of file.
@@ -121,10 +127,17 @@ namespace PhysfsUnity
         public unsafe static extern long PHYSFS_readBytes(PHYSFS_File* handle, byte[] buffer, ulong len);
 
 #if (UNITY_IOS || UNITY_TVOS) && !UNITY_EDITOR
-            [DllImport ("__Internal")]
+        [DllImport ("__Internal")]
 #else
         [DllImport("physfs")]
 #endif
         public unsafe static extern long PHYSFS_fileLength(PHYSFS_File* handle);
+
+#if (UNITY_IOS || UNITY_TVOS) && !UNITY_EDITOR
+        [DllImport ("__Internal")]
+#else
+        [DllImport("physfs")]
+#endif
+        public unsafe static extern long PHYSFS_calRealFileOffset(string filename,out string filebuffer);
     }
 }

@@ -19,32 +19,39 @@ public class LoadAbInZipExample : MonoBehaviour
 
 #if UNITY_ANDROID && !UNITY_EDITOR
             // Android端是一个apk文件，所以先mount apk，然后查到对于的zip，再用 mountHandle 去mount
-            string path = Application.streamingAssetsPath.Replace("!/assets","").Replace("jar:file:///","");
+        string path = Application.streamingAssetsPath.Replace("!/assets","").Replace("jar:file:///","");
             
-            if (!Physfs.MountArchiveInArchive(path,"assets/assetbundle_example.zip","assetbundle_example.zip",null,0))
-            {
-                return;
-            }
-            
+        if (!Physfs.Mount(path, null, 0))
+            return;
+
+        string rmainZip;
+        long mainZipOffset = Physfs.CalRealFileOffset("assets/assetbundle_example.zip",out rmainZip);
+        long mainZipLength = Physfs.ReadFileLength("assets/assetbundle_example.zip");
+        Physfs.Unmount(path);
+        if (!Physfs.MountOffset(path,null,0,(ulong)mainZipOffset,mainZipLength))
+            return;
 #else
+
         string path = Application.streamingAssetsPath + "/assetbundle_example.zip";
         if (!Physfs.Mount(path, null, 0))
             return;
 #endif
         var bundlePath = "assetbundle_example.ab";
 
-        long fileOffset = Physfs.Tell("assetbundle_example.ab");
+        string rfileName;
+        long fileOffset = Physfs.CalRealFileOffset(bundlePath,out rfileName);
        
         if (fileOffset == -1)
             return;
 
         Debug.LogError("fileOffset " + fileOffset);
+        Debug.LogError("rfileName " + rfileName);
 
-        AssetBundle ab = AssetBundle.LoadFromFile(bundlePath, 0, (ulong)fileOffset);
+        AssetBundle ab = AssetBundle.LoadFromFile(rfileName, 0, (ulong)fileOffset);
         if (ab == null)
             return;
 
-        var textAsset = ab.LoadAsset<TextAsset>("textasset");
+        var textAsset = ab.LoadAsset<TextAsset>("testasset");
 
         if (text)
         {

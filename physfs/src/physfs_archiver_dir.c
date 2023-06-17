@@ -93,7 +93,7 @@ static PHYSFS_Io *doOpen(void *opaque, const char *name, const int mode)
     CVT_TO_DEPENDENT(f, opaque, name);
     BAIL_IF_ERRPASS(!f, NULL);
 
-    io = __PHYSFS_createNativeIo(f, mode);
+    io = __PHYSFS_createNativeIo(f, mode,0,-1);
     if (io == NULL)
     {
         const PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();

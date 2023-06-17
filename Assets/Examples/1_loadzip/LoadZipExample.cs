@@ -17,14 +17,17 @@ public class LoadZipExample : MonoBehaviour
 
             
         #if UNITY_ANDROID && !UNITY_EDITOR
-            // Android端是一个apk文件，所以先mount apk，然后查到对于的zip，再用 mountHandle 去mount
             string path = Application.streamingAssetsPath.Replace("!/assets","").Replace("jar:file:///","");
             
-            if (!Physfs.MountArchiveInArchive(path,"assets/test.zip","test.zip",null,0))
-            {
+            if (!Physfs.Mount(path, null, 0))
                 return;
-            }
-            
+
+            string rmainZip;
+            long mainZipOffset = Physfs.CalRealFileOffset("assets/assetbundle_example.zip",out rmainZip);
+            long mainZipLength = Physfs.ReadFileLength("assets/assetbundle_example.zip");
+            Physfs.Unmount(path);
+            if (!Physfs.MountOffset(path,null,0,(ulong)mainZipOffset,mainZipLength))
+                return;
         #else
             string path = Application.streamingAssetsPath + "/test.zip";
             if (!Physfs.Mount(path,null,0))
@@ -44,8 +47,6 @@ public class LoadZipExample : MonoBehaviour
             }
 
             Physfs.Unmount(path);
-        
-
     }
 
     void OnDestroy()

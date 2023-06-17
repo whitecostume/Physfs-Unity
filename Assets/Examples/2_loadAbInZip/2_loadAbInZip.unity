@@ -494,7 +494,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Load Zip
+  m_Text: Load Assetbundle in Zip
 --- !u!222 &1619627676
 CanvasRenderer:
   m_ObjectHideFlags: 0

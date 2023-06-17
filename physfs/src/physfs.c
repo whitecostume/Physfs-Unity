@@ -147,17 +147,22 @@ static PHYSFS_sint64 nativeIo_write(PHYSFS_Io *io, const void *buffer,
 static int nativeIo_seek(PHYSFS_Io *io, PHYSFS_uint64 offset)
 {
     NativeIoInfo *info = (NativeIoInfo *) io->opaque;
-    return __PHYSFS_platformSeek(info->handle, offset);
+    return __PHYSFS_platformSeek(info->handle, offset + io->offset);
 } /* nativeIo_seek */
 
 static PHYSFS_sint64 nativeIo_tell(PHYSFS_Io *io)
 {
     NativeIoInfo *info = (NativeIoInfo *) io->opaque;
-    return __PHYSFS_platformTell(info->handle);
+    return __PHYSFS_platformTell(info->handle) - io->offset;
 } /* nativeIo_tell */
 
 static PHYSFS_sint64 nativeIo_length(PHYSFS_Io *io)
 {
+    if (io->filelength >= 0)
+    {
+        return io->filelength;
+    }
+    
     NativeIoInfo *info = (NativeIoInfo *) io->opaque;
     return __PHYSFS_platformFileLength(info->handle);
 } /* nativeIo_length */
@@ -165,7 +170,7 @@ static PHYSFS_sint64 nativeIo_length(PHYSFS_Io *io)
 static PHYSFS_Io *nativeIo_duplicate(PHYSFS_Io *io)
 {
     NativeIoInfo *info = (NativeIoInfo *) io->opaque;
-    return __PHYSFS_createNativeIo(info->path, info->mode);
+    return __PHYSFS_createNativeIo(info->path, info->mode,io->offset,io->filelength);
 } /* nativeIo_duplicate */
 
 static int nativeIo_flush(PHYSFS_Io *io)
@@ -185,7 +190,7 @@ static void nativeIo_destroy(PHYSFS_Io *io)
 
 static const PHYSFS_Io __PHYSFS_nativeIoInterface =
 {
-    CURRENT_PHYSFS_IO_API_VERSION, NULL,
+    CURRENT_PHYSFS_IO_API_VERSION, NULL,0,-1,
     nativeIo_read,
     nativeIo_write,
     nativeIo_seek,
@@ -196,7 +201,7 @@ static const PHYSFS_Io __PHYSFS_nativeIoInterface =
     nativeIo_destroy
 };
 
-PHYSFS_Io *__PHYSFS_createNativeIo(const char *path, const int mode)
+PHYSFS_Io *__PHYSFS_createNativeIo(const char *path, const int mode,PHYSFS_uint64 offset,PHYSFS_sint64 fileLength)
 {
     PHYSFS_Io *io = NULL;
     NativeIoInfo *info = NULL;
@@ -225,8 +230,11 @@ PHYSFS_Io *__PHYSFS_createNativeIo(const char *path, const int mode)
     info->handle = handle;
     info->path = pathdup;
     info->mode = mode;
+    
     memcpy(io, &__PHYSFS_nativeIoInterface, sizeof (*io));
     io->opaque = info;
+    io->offset = offset;
+    io->filelength = fileLength;
     return io;
 
 createNativeIo_failed:
@@ -370,7 +378,7 @@ static void memoryIo_destroy(PHYSFS_Io *io)
 
 static const PHYSFS_Io __PHYSFS_memoryIoInterface =
 {
-    CURRENT_PHYSFS_IO_API_VERSION, NULL,
+    CURRENT_PHYSFS_IO_API_VERSION, NULL,0,-1,
     memoryIo_read,
     memoryIo_write,
     memoryIo_seek,
@@ -513,7 +521,7 @@ static void handleIo_destroy(PHYSFS_Io *io)
 
 static const PHYSFS_Io __PHYSFS_handleIoInterface =
 {
-    CURRENT_PHYSFS_IO_API_VERSION, NULL,
+    CURRENT_PHYSFS_IO_API_VERSION, NULL,0,-1,
     handleIo_read,
     handleIo_write,
     handleIo_seek,
@@ -867,7 +875,7 @@ static DirHandle *tryOpenDir(PHYSFS_Io *io, const PHYSFS_Archiver *funcs,
 } /* tryOpenDir */
 
 
-static DirHandle *openDirectory(PHYSFS_Io *io, const char *d, int forWriting)
+static DirHandle *openDirectory(PHYSFS_Io *io, const char *d, int forWriting,PHYSFS_uint64 offset,PHYSFS_sint64 fileLength)
 {
     DirHandle *retval = NULL;
     PHYSFS_Archiver **i;
@@ -892,7 +900,7 @@ static DirHandle *openDirectory(PHYSFS_Io *io, const char *d, int forWriting)
                 return retval;
         } /* if */
 
-        io = __PHYSFS_createNativeIo(d, forWriting ? 'w' : 'r');
+        io = __PHYSFS_createNativeIo(d, forWriting ? 'w' : 'r',offset,fileLength);
         BAIL_IF_ERRPASS(!io, NULL);
         created_io = 1;
     } /* if */
@@ -1031,7 +1039,7 @@ static int partOfMountPoint(DirHandle *h, char *fname)
 
 
 static DirHandle *createDirHandle(PHYSFS_Io *io, const char *newDir,
-                                  const char *mountPoint, int forWriting)
+                                  const char *mountPoint, int forWriting,PHYSFS_uint64 offset,PHYSFS_sint64 fileLength)
 {
     DirHandle *dirHandle = NULL;
     char *tmpmntpnt = NULL;
@@ -1048,7 +1056,7 @@ static DirHandle *createDirHandle(PHYSFS_Io *io, const char *newDir,
         mountPoint = tmpmntpnt;  /* sanitized version. */
     } /* if */
 
-    dirHandle = openDirectory(io, newDir, forWriting);
+    dirHandle = openDirectory(io, newDir, forWriting,offset,fileLength);
     GOTO_IF_ERRPASS(!dirHandle, badDirHandle);
 
     dirHandle->dirName = (char *) allocator.Malloc(strlen(newDir) + 1);
@@ -1169,34 +1177,35 @@ static int initStaticArchivers(void)
     #if PHYSFS_SUPPORTS_ZIP
         REGISTER_STATIC_ARCHIVER(ZIP);
     #endif
-    #if PHYSFS_SUPPORTS_7Z
-        SZIP_global_init();
-        REGISTER_STATIC_ARCHIVER(7Z);
-    #endif
-    #if PHYSFS_SUPPORTS_GRP
-        REGISTER_STATIC_ARCHIVER(GRP);
-    #endif
-    #if PHYSFS_SUPPORTS_QPAK
-        REGISTER_STATIC_ARCHIVER(QPAK);
-    #endif
-    #if PHYSFS_SUPPORTS_HOG
-        REGISTER_STATIC_ARCHIVER(HOG);
-    #endif
-    #if PHYSFS_SUPPORTS_MVL
-        REGISTER_STATIC_ARCHIVER(MVL);
-    #endif
-    #if PHYSFS_SUPPORTS_WAD
-        REGISTER_STATIC_ARCHIVER(WAD);
-    #endif
-    #if PHYSFS_SUPPORTS_SLB
-        REGISTER_STATIC_ARCHIVER(SLB);
-    #endif
-    #if PHYSFS_SUPPORTS_ISO9660
-        REGISTER_STATIC_ARCHIVER(ISO9660);
-    #endif
-    #if PHYSFS_SUPPORTS_VDF
-        REGISTER_STATIC_ARCHIVER(VDF)
-    #endif
+
+    // #if PHYSFS_SUPPORTS_7Z
+    //     SZIP_global_init();
+    //     REGISTER_STATIC_ARCHIVER(7Z);
+    // #endif
+    // #if PHYSFS_SUPPORTS_GRP
+    //     REGISTER_STATIC_ARCHIVER(GRP);
+    // #endif
+    // #if PHYSFS_SUPPORTS_QPAK
+    //     REGISTER_STATIC_ARCHIVER(QPAK);
+    // #endif
+    // #if PHYSFS_SUPPORTS_HOG
+    //     REGISTER_STATIC_ARCHIVER(HOG);
+    // #endif
+    // #if PHYSFS_SUPPORTS_MVL
+    //     REGISTER_STATIC_ARCHIVER(MVL);
+    // #endif
+    // #if PHYSFS_SUPPORTS_WAD
+    //     REGISTER_STATIC_ARCHIVER(WAD);
+    // #endif
+    // #if PHYSFS_SUPPORTS_SLB
+    //     REGISTER_STATIC_ARCHIVER(SLB);
+    // #endif
+    // #if PHYSFS_SUPPORTS_ISO9660
+    //     REGISTER_STATIC_ARCHIVER(ISO9660);
+    // #endif
+    // #if PHYSFS_SUPPORTS_VDF
+    //     REGISTER_STATIC_ARCHIVER(VDF)
+    // #endif
 
     #undef REGISTER_STATIC_ARCHIVER
 
@@ -1737,7 +1746,7 @@ int PHYSFS_setWriteDir(const char *newDir)
 
     if (newDir != NULL)
     {
-        writeDir = createDirHandle(NULL, newDir, NULL, 1);
+        writeDir = createDirHandle(NULL, newDir, NULL, 1,0,-1);
         retval = (writeDir != NULL);
     } /* if */
 
@@ -1796,7 +1805,7 @@ int PHYSFS_setRoot(const char *archive, const char *subdir)
 
 
 static int doMount(PHYSFS_Io *io, const char *fname,
-                   const char *mountPoint, int appendToPath)
+                   const char *mountPoint, int appendToPath,PHYSFS_uint64 offset,PHYSFS_sint64 fileLength)
 {
     DirHandle *dh;
     DirHandle *prev = NULL;
@@ -1817,7 +1826,7 @@ static int doMount(PHYSFS_Io *io, const char *fname,
         prev = i;
     } /* for */
 
-    dh = createDirHandle(io, fname, mountPoint, 0);
+    dh = createDirHandle(io, fname, mountPoint, 0,offset,fileLength);
     BAIL_IF_MUTEX_ERRPASS(!dh, stateLock, 0);
 
     if (appendToPath)
@@ -1844,7 +1853,7 @@ int PHYSFS_mountIo(PHYSFS_Io *io, const char *fname,
     BAIL_IF(!io, PHYSFS_ERR_INVALID_ARGUMENT, 0);
     BAIL_IF(!fname, PHYSFS_ERR_INVALID_ARGUMENT, 0);
     BAIL_IF(io->version != 0, PHYSFS_ERR_UNSUPPORTED, 0);
-    return doMount(io, fname, mountPoint, appendToPath);
+    return doMount(io, fname, mountPoint, appendToPath,0,-1);
 } /* PHYSFS_mountIo */
 
 
@@ -1860,7 +1869,7 @@ int PHYSFS_mountMemory(const void *buf, PHYSFS_uint64 len, void (*del)(void *),
 
     io = __PHYSFS_createMemoryIo(buf, len, del);
     BAIL_IF_ERRPASS(!io, 0);
-    retval = doMount(io, fname, mountPoint, appendToPath);
+    retval = doMount(io, fname, mountPoint, appendToPath,0,-1);
     if (!retval)
     {
         /* docs say not to call (del) in case of failure, so cheat. */
@@ -1884,7 +1893,7 @@ int PHYSFS_mountHandle(PHYSFS_File *file, const char *fname,
 
     io = __PHYSFS_createHandleIo(file);
     BAIL_IF_ERRPASS(!io, 0);
-    retval = doMount(io, fname, mountPoint, appendToPath);
+    retval = doMount(io, fname, mountPoint, appendToPath,0,-1);
     if (!retval)
     {
         /* docs say not to destruct in case of failure, so cheat. */
@@ -1899,8 +1908,14 @@ int PHYSFS_mountHandle(PHYSFS_File *file, const char *fname,
 int PHYSFS_mount(const char *newDir, const char *mountPoint, int appendToPath)
 {
     BAIL_IF(!newDir, PHYSFS_ERR_INVALID_ARGUMENT, 0);
-    return doMount(NULL, newDir, mountPoint, appendToPath);
+    return doMount(NULL, newDir, mountPoint, appendToPath,0,-1);
 } /* PHYSFS_mount */
+
+int PHYSFS_mountOffset(const char *newDir, const char *mountPoint, int appendToPath, PHYSFS_uint64 offset,PHYSFS_sint64 fileLength)
+{
+    BAIL_IF(!newDir, PHYSFS_ERR_INVALID_ARGUMENT, 0);
+    return doMount(NULL, newDir, mountPoint, appendToPath,offset,fileLength);
+}/* PHYSFS_mountOffset */
 
 
 int PHYSFS_addToSearchPath(const char *newDir, int appendToPath)
@@ -3243,6 +3258,31 @@ const PHYSFS_Allocator *PHYSFS_getAllocator(void)
     BAIL_IF(!initialized, PHYSFS_ERR_NOT_INITIALIZED, NULL);
     return &allocator;
 } /* PHYSFS_getAllocator */
+
+// 计算真文件的偏移
+const PHYSFS_sint64 PHYSFS_calRealFileOffset(const char* fname,char** relativePath)
+{
+    DirHandle *dh = getRealDirHandle(fname);
+    if (dh == NULL)
+    {
+        return -1;
+    }
+
+    const char *mountExt = dh->funcs->info.extension;
+    
+    // 不是压缩挂点
+    if (PHYSFS_utf8stricmp(mountExt, "") == 0)
+    {
+        *relativePath = fname;
+        return 0;
+    }
+
+    *relativePath = (dh->dirName);
+
+    PHYSFS_sint64 offset = dh->funcs->getFileOffset(dh->opaque, fname);
+
+    return offset;
+} 
 
 
 static void *mallocAllocatorMalloc(PHYSFS_uint64 s)

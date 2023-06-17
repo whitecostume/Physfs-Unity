@@ -304,6 +304,7 @@ static int readui16(PHYSFS_Io *io, PHYSFS_uint16 *val)
 } /* readui16 */
 
 
+
 static PHYSFS_sint64 ZIP_read(PHYSFS_Io *_io, void *buf, PHYSFS_uint64 len)
 {
     ZIPfileinfo *finfo = (ZIPfileinfo *) _io->opaque;
@@ -514,7 +515,7 @@ static void ZIP_destroy(PHYSFS_Io *io)
 
 static const PHYSFS_Io ZIP_Io =
 {
-    CURRENT_PHYSFS_IO_API_VERSION, NULL,
+    CURRENT_PHYSFS_IO_API_VERSION, NULL,0,-1,
     ZIP_read,
     ZIP_write,
     ZIP_seek,
@@ -1535,6 +1536,30 @@ static PHYSFS_Io *zip_get_io(PHYSFS_Io *io, ZIPinfo *inf, ZIPentry *entry)
     return retval;
 } /* zip_get_io */
 
+static PHYSFS_sint64 ZIP_getFileOffset(void *opaque, const char *filename)
+{
+    ZIPinfo *info = (ZIPinfo *) opaque;
+    ZIPentry *entry = zip_find_entry(info, filename);
+
+     /* if not found, see if maybe "$PASSWORD" is appended. */
+    if ((!entry) && (info->has_crypto))
+    {
+        const char *ptr = strrchr(filename, '$');
+        if (ptr != NULL)
+        {
+            const size_t len = (size_t) (ptr - filename);
+            char *str = (char *) __PHYSFS_smallAlloc(len + 1);
+            BAIL_IF(!str, PHYSFS_ERR_OUT_OF_MEMORY, -1);
+            memcpy(str, filename, len);
+            str[len] = '\0';
+            entry = zip_find_entry(info, str);
+            __PHYSFS_smallFree(str);
+        } /* if */
+    } /* if */
+
+    BAIL_IF_ERRPASS(!entry, -1);
+    return entry->offset + info->io->offset;
+}
 
 static PHYSFS_Io *ZIP_openRead(void *opaque, const char *filename)
 {
@@ -1709,7 +1734,8 @@ const PHYSFS_Archiver __PHYSFS_Archiver_ZIP =
     ZIP_remove,
     ZIP_mkdir,
     ZIP_stat,
-    ZIP_closeArchive
+    ZIP_closeArchive,
+    ZIP_getFileOffset
 };
 
 #endif  /* defined PHYSFS_SUPPORTS_ZIP */
