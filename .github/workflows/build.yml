@@ -30,7 +30,7 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
-          path: ./physfs/build_android/**/*
+          path: ./physfs/**/libphysfs.so
           name: android_physfs_so
 
   windows:
