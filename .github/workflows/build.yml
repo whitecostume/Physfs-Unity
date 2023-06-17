@@ -28,6 +28,6 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          path: ./build_win/Release/physfs.dll
+          path: ./physfs/build_win/Release/physfs.dll
           name: win_physfs.dll
 
