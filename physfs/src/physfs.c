@@ -3260,7 +3260,7 @@ const PHYSFS_Allocator *PHYSFS_getAllocator(void)
 } /* PHYSFS_getAllocator */
 
 // 计算真文件的偏移
-const PHYSFS_sint64 PHYSFS_calRealFileOffset(const char* fname,char** relativePath)
+const PHYSFS_sint64 PHYSFS_calRealFileOffset(char* fname,char** relativePath)
 {
     DirHandle *dh = getRealDirHandle(fname);
     if (dh == NULL)
