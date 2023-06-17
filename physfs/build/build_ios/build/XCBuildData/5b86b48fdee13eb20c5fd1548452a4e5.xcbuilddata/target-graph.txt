@@ -1,0 +1,14 @@
+Target dependency graph (5 targets)
+ZERO_CHECK in PhysicsFS, no dependencies
+physfs in PhysicsFS, depends on:
+ZERO_CHECK in PhysicsFS (explicit)
+test_physfs in PhysicsFS, depends on:
+physfs in PhysicsFS (explicit)
+ZERO_CHECK in PhysicsFS (explicit)
+physfs-static in PhysicsFS, depends on:
+ZERO_CHECK in PhysicsFS (explicit)
+ALL_BUILD in PhysicsFS, depends on:
+physfs in PhysicsFS (explicit)
+test_physfs in PhysicsFS (explicit)
+physfs-static in PhysicsFS (explicit)
+ZERO_CHECK in PhysicsFS (explicit)
