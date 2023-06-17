@@ -11,11 +11,15 @@ public class LoadAbInZipExample : MonoBehaviour
     public SpriteRenderer spriteRenderer;
     public Text text;
 
+    AssetBundle ab;
+
     void Start()
     {
 
 
-        Physfs.Init();
+        if (!Physfs.Init())
+            return;
+        
 
 #if UNITY_ANDROID && !UNITY_EDITOR
             // Android端是一个apk文件，所以先mount apk，然后查到对于的zip，再用 mountHandle 去mount
@@ -47,11 +51,13 @@ public class LoadAbInZipExample : MonoBehaviour
         Debug.LogWarning("fileOffset " + fileOffset);
         Debug.LogWarning("rfileName " + rfileName);
 
-        AssetBundle ab = AssetBundle.LoadFromFile(rfileName, 0, (ulong)fileOffset);
+        ab = AssetBundle.LoadFromFile(rfileName, 0, (ulong)fileOffset);
         if (ab == null)
             return;
 
+
         var textAsset = ab.LoadAsset<TextAsset>("testasset");
+
 
         if (text && textAsset)
         {
@@ -64,7 +70,6 @@ public class LoadAbInZipExample : MonoBehaviour
             spriteRenderer.sprite = spriteSun;
         }
 
-        // ab.Unload(true);
 
         Physfs.Unmount(path);
     }
@@ -72,5 +77,6 @@ public class LoadAbInZipExample : MonoBehaviour
     void OnDestroy()
     {
         Physfs.DeInit();
+        ab?.Unload(true);
     }
 }

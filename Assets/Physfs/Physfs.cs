@@ -39,18 +39,36 @@ namespace PhysfsUnity
             PHYSFS_ERR_APP_CALLBACK      /**< Application callback reported error.  */
         }
 
-        public static void Init()
+        /**
+            return nonzero on success, zero on error. Specifics of the error can be
+                 gleaned from PHYSFS_getLastError().
+        */
+        public static bool Init()
         {
-            Physfs_Dll.PHYSFS_init(null);
+            bool result = Physfs_Dll.PHYSFS_init(null) != 0;
+            if (!result)
+            {
+                Debug.LogError($"PHYSFS_init fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}" );
+            }
+            return  result;
         }
 
-        public static void DeInit()
+        /**
+            return nonzero on success, zero on error. Specifics of the error can be
+            gleaned from PHYSFS_getLastError(). If failure, state of PhysFS is
+               undefined, and probably badly screwed up.
+        */
+        public static bool DeInit()
         {
-            Physfs_Dll.PHYSFS_deinit();
+            bool result = Physfs_Dll.PHYSFS_deinit() != 0;
+            if (!result)
+            {
+                Debug.LogError($"PHYSFS_deinit fail, errorCode {(Physfs.PHYSFS_ErrorCode) Physfs_Dll.PHYSFS_getLastErrorCode()}" );
+            }
+            return  result;
         }
 
 
-        
         public static bool Mount(string path,string mountPoint,int appendToPath)
         {
             unsafe
