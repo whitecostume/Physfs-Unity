@@ -33,6 +33,7 @@ CMakeFiles/
 .vscode/
 AssetBundles-Browser-master/
 AssetBundles/
+physfs/build64/
 
 # Gradle cache directory
 .gradle/
