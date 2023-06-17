@@ -4,4 +4,4 @@ cd ..
 cmake --build build_osx --config Release
 
 mkdir -p Plugins/OSX/
-cp build_osx/Release/libphysfs.*.dylib Plugins/OSX/libphysfs.dylib 
+cp build_osx/Release/libphysfs.dylib Plugins/OSX/libphysfs.dylib 
