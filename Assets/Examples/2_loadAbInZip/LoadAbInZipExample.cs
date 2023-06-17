@@ -8,7 +8,7 @@ using PhysfsUnity;
 /// </summary>
 public class LoadAbInZipExample : MonoBehaviour
 {
-
+    public SpriteRenderer spriteRenderer;
     public Text text;
 
     void Start()
@@ -44,8 +44,8 @@ public class LoadAbInZipExample : MonoBehaviour
         if (fileOffset == -1)
             return;
 
-        Debug.LogError("fileOffset " + fileOffset);
-        Debug.LogError("rfileName " + rfileName);
+        Debug.LogWarning("fileOffset " + fileOffset);
+        Debug.LogWarning("rfileName " + rfileName);
 
         AssetBundle ab = AssetBundle.LoadFromFile(rfileName, 0, (ulong)fileOffset);
         if (ab == null)
@@ -53,12 +53,18 @@ public class LoadAbInZipExample : MonoBehaviour
 
         var textAsset = ab.LoadAsset<TextAsset>("testasset");
 
-        if (text)
+        if (text && textAsset)
         {
             text.text = textAsset.text;
         }
 
-        ab.Unload(true);
+        var spriteSun = ab.LoadAsset<Sprite>("sun");
+        if (spriteRenderer && spriteSun)
+        {
+            spriteRenderer.sprite = spriteSun;
+        }
+
+        // ab.Unload(true);
 
         Physfs.Unmount(path);
     }
