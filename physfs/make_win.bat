@@ -1,4 +1,4 @@
-mkdir build64 & pushd build64
+mkdir build_win & pushd build_win
 cmake -G "Visual Studio 17 2022" -A Win32 ..
 popd
-cmake --build build64 --config Release
+cmake --build build_win --config Release
