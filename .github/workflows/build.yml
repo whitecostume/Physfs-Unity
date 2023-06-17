@@ -25,6 +25,7 @@ jobs:
       - name: Build
         run: |
           cd physfs
+          chmod 777 make_android.sh
           ./make_android.sh
       - name: Upload
         uses: actions/upload-artifact@v3
